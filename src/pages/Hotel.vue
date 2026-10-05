@@ -42,6 +42,28 @@
                         </div>
                     </div>
                 </div>
+                <section v-if="hotel.rates && hotel.rates.length"
+                         class="flex flex-col gap-3 rounded-[12px] border bg-white p-4 shadow-sm">
+                    <h2 class="text-xl font-bold">Guest reviews</h2>
+                    <router-link :to="`/Rates/${hotel._id}`"
+                                 class="w-fit rounded-[12px] bg-[#5856d6] px-4 py-2 font-semibold text-white">
+                        Leave a review
+                    </router-link>
+                    <article v-for="review in hotel.rates"
+                             :key="review._id"
+                             class="border-t pt-3">
+                        <div class="flex items-center justify-between gap-3">
+                            <span class="font-semibold">{{ review.username }}</span>
+                            <span class="whitespace-nowrap text-orange-400">
+                                {{ "★".repeat(review.stars) }}
+                            </span>
+                        </div>
+                        <p class="mt-1 text-sm text-gray-600">{{ review.text }}</p>
+                        <time class="mt-1 block text-xs text-gray-500">
+                            {{ new Date(review.addedDate).toLocaleDateString("ru-RU") }}
+                        </time>
+                    </article>
+                </section>
                 <v-address :map="hotel.map" />
                 <v-description :description="hotel.description" />
                 <v-contacts :contacts="hotel.contacts" />

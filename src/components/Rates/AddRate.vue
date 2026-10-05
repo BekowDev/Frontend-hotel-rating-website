@@ -26,9 +26,14 @@
                 <textarea type="text"
                           rows="10"
                           placeholder="Your Review here..."
+                          maxlength="1000"
                           class="rounded-[12px] bg-[var(--fields-color)] border-[1px] outline-none p-3"
                           :value="$store.state.ratesModule.postData.text"
                           @input="$store.commit('ratesModule/setText', $event.target.value)" />
+                <p v-if="$store.state.ratesModule.formError"
+                   class="text-sm text-red-600">
+                    {{ $store.state.ratesModule.formError }}
+                </p>
                 <div class="grid grid-flow-row gap-4 sm:grid-flow-col sm:justify-between">
                     <v-button style="font-weight: 100;">
                         <ItemStars />
@@ -56,22 +61,26 @@ export default {
     methods: {
         toggleSort() {
             this.sortActive = !this.sortActive;
+            this.$store.commit("ratesModule/setFormError", "");
             document.body.style.overflow = this.sortActive
                 ? "hidden"
                 : "scroll";
         },
 
         async addReview() {
-            this.sortActive = !this.sortActive;
-            document.body.style.overflow = this.sortActive ? "hidden" : "scroll";
-
-            await this.$store.dispatch("ratesModule/addReview");
+            const added = await this.$store.dispatch("ratesModule/addReview");
+            if (!added) return;
+            this.sortActive = false;
+            document.body.style.overflow = "scroll";
             await this.$store.dispatch("ratesModule/getRates");
         },
         async deleteReview() {
             await this.$store.dispatch("ratesModule/deleteReview");
             await this.$store.dispatch("ratesModule/getRates");
         },
+    },
+    beforeUnmount() {
+        document.body.style.overflow = "scroll";
     },
 };
 </script>

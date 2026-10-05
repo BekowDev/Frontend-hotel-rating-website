@@ -1,4 +1,34 @@
 import { HotelAPI } from "../api/hotelAPI";
+import mockHotels from "@/data/mockHotels";
+import { getDemoReviews } from "@/data/demoReviews";
+
+function getDemoHotels({ city, search, sortBy, sortOrder, page, limit }) {
+    const matchingHotels = mockHotels
+        .filter((hotel) => !city || hotel.city === city)
+        .filter((hotel) =>
+            `${hotel.name} ${hotel.type} ${hotel.address}`
+                .toLowerCase()
+                .includes((search || "").toLowerCase())
+        )
+        .sort((first, second) => {
+            const firstValue = Number(first[sortBy]) || first[sortBy];
+            const secondValue = Number(second[sortBy]) || second[sortBy];
+            const comparison =
+                typeof firstValue === "number"
+                    ? firstValue - secondValue
+                    : String(firstValue).localeCompare(String(secondValue));
+
+            return sortOrder === "desc" ? -comparison : comparison;
+        })
+        .map((hotel) => ({ ...hotel, rates: getDemoReviews(hotel) }));
+    const start = (Number(page) - 1) * Number(limit);
+
+    return {
+        hotels: matchingHotels.slice(start, start + Number(limit)),
+        total: matchingHotels.length,
+    };
+}
+
 export const searchModule = {
     namespaced: true,
     state: () => ({
@@ -25,6 +55,9 @@ export const searchModule = {
         setSearch(state, value) {
             state.getData.search = value;
         },
+        setPage(state, value) {
+            state.getData.page = Number(value?.value || value);
+        },
         setCity(state, value) {
             state.getData.city = value;
         },
@@ -50,14 +83,18 @@ export const searchModule = {
     },
     actions: {
         async getHotels({ commit, state }) {
+            const demo = getDemoHotels(state.getData);
+            commit("setHotels", demo.hotels);
+            commit("setTotalPage", demo.total);
+
             try {
-                setTimeout(async () => {
-                    const res = await HotelAPI.getHotels(state.getData);
+                const res = await HotelAPI.getHotels(state.getData);
+                if (Array.isArray(res.data.hotels) && res.data.hotels.length > 0) {
                     commit("setHotels", res.data.hotels);
                     commit("setTotalPage", res.data.totalPage);
-                }, 500);
+                }
             } catch (error) {
-                console.error("POST request Error:", error);
+                console.error("Hotel request failed; showing demo hotels:", error);
             }
         },
     },

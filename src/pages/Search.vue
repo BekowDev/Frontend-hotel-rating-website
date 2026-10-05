@@ -6,6 +6,7 @@
                 <div class="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4">
                     <TransitionGroup name="transition">
                         <Item-Hotel v-for="hotel in allHotels"
+                                    :key="hotel._id"
                                     :hotel="hotel" />
                     </TransitionGroup>
                 </div>

@@ -1,4 +1,6 @@
 import { RatesAPI } from "@/api/RatesAPI";
+import mockHotels from "@/data/mockHotels";
+import { getDemoReviews, saveDemoReviews } from "@/data/demoReviews";
 
 export const ratesModule = {
     namespaced: true,
@@ -6,6 +8,7 @@ export const ratesModule = {
         rates: [],
         totalPage: 1,
         reviewed: false,
+        formError: "",
         getData: {
             id: "",
             sortBy: "addedDate",
@@ -37,6 +40,9 @@ export const ratesModule = {
         setReviewed(state, value) {
             state.reviewed = value;
         },
+        setFormError(state, value) {
+            state.formError = value;
+        },
 
         setId(state, id) {
             state.getData.id = id;
@@ -63,29 +69,107 @@ export const ratesModule = {
     },
     actions: {
         async getRates({ commit, state }) {
+            const hotel = mockHotels.find((item) => item._id === state.getData.id);
+            const username = localStorage.getItem("name") || "Гость";
+
+            if (hotel) {
+                const allReviews = getDemoReviews(hotel);
+                const reviews = allReviews
+                    .filter((rate) =>
+                        rate.text.toLowerCase().includes(state.getData.search.toLowerCase())
+                    )
+                    .sort((first, second) => {
+                        const comparison =
+                            first[state.getData.sortBy] > second[state.getData.sortBy]
+                                ? 1
+                                : first[state.getData.sortBy] < second[state.getData.sortBy]
+                                    ? -1
+                                    : 0;
+                        return state.getData.sortOrder === "desc" ? -comparison : comparison;
+                    });
+                const start = (state.getData.page - 1) * state.getData.limit;
+                commit("setRates", reviews.slice(start, start + state.getData.limit));
+                commit("setTotalPage", reviews.length);
+                commit("setReviewed", allReviews.some(
+                    (rate) => rate.username === username && rate.isDemoUserReview
+                ));
+                return;
+            }
+
             try {
                 const res = await RatesAPI.getRates(state.getData);
-                commit("setRates", res.data.rates);
-                commit("setTotalPage", res.data.totalPage);
-                commit("setReviewed", res.data.reviewed);
+                if (Array.isArray(res.data.rates)) {
+                    commit("setRates", res.data.rates);
+                    commit("setTotalPage", res.data.totalPage);
+                    commit("setReviewed", res.data.reviewed);
+                }
             } catch (error) {
-                console.error("POST request Error:", error);
+                console.error("Review request failed:", error);
             }
         },
         async addReview({ commit, state }) {
+            const text = state.postData.text.trim();
+            if (!text || state.postData.stars < 1 || state.postData.stars > 5) {
+                commit("setFormError", "Напишите отзыв и выберите оценку от 1 до 5.");
+                return false;
+            }
+
+            const hotel = mockHotels.find((item) => item._id === state.getData.id);
+            const username = localStorage.getItem("name") || "Гость";
+            if (hotel) {
+                const reviews = getDemoReviews(hotel);
+                if (reviews.some((rate) => rate.username === username && rate.isDemoUserReview)) {
+                    commit("setReviewed", true);
+                    return false;
+                }
+
+                const review = {
+                    _id: `demo-review-${Date.now()}`,
+                    username,
+                    stars: state.postData.stars,
+                    addedDate: new Date().toISOString(),
+                    text,
+                    isDemoUserReview: true,
+                };
+                const updatedReviews = [review, ...reviews];
+                saveDemoReviews(hotel._id, updatedReviews);
+                commit("setText", "");
+                commit("setStar", 0);
+                commit("setFormError", "");
+                commit("setReviewed", true);
+                return true;
+            }
+
             try {
                 await RatesAPI.addReview({
-                    username: localStorage.getItem("name"),
-                    text: state.postData.text,
+                    username,
+                    text,
                     hotel_id: state.getData.id,
                     stars: state.postData.stars,
                 });
                 commit("setReviewed", true);
+                commit("setText", "");
+                commit("setStar", 0);
+                commit("setFormError", "");
+                return true;
             } catch (error) {
                 console.error("POST request Error:", error);
+                commit("setFormError", "Не удалось отправить отзыв. Попробуйте ещё раз.");
+                return false;
             }
         },
         async deleteReview({ commit, state }) {
+            const hotel = mockHotels.find((item) => item._id === state.getData.id);
+            if (hotel) {
+                const username = localStorage.getItem("name") || "Гость";
+                const reviews = getDemoReviews(hotel).filter(
+                    (rate) => !(rate.username === username && rate.isDemoUserReview)
+                );
+                saveDemoReviews(hotel._id, reviews);
+                commit("setReviewed", false);
+                return;
+            }
+
             try {
                 await RatesAPI.deleteReview({
                     hotel_id: state.getData.id,

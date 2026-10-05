@@ -1,4 +1,6 @@
 import { HotelAPI } from "@/api/hotelAPI";
+import mockHotels from "@/data/mockHotels";
+import { getDemoReviews } from "@/data/demoReviews";
 
 export const hotelModule = {
     namespaced: true,
@@ -21,11 +23,21 @@ export const hotelModule = {
     },
     actions: {
         async getHotel({ commit, state }) {
+            const demoHotel = mockHotels.find((hotel) => hotel._id === state.id);
+            if (demoHotel) {
+                commit("setHotel", {
+                    ...demoHotel,
+                    rates: getDemoReviews(demoHotel),
+                });
+            }
+
             try {
                 const res = await HotelAPI.getHotel({ id: state.id });
-                commit("setHotel", res.data);
+                if (res.data && Object.keys(res.data).length > 0) {
+                    commit("setHotel", res.data);
+                }
             } catch (error) {
-                console.error("POST request Error:", error);
+                console.error("Hotel request failed; showing demo hotel:", error);
             }
         },
     },

@@ -38,6 +38,23 @@
                     </div>
                 </div>
             </div>
+            <div v-if="hotel.rates && hotel.rates.length"
+                 class="mt-3 border-t pt-3">
+                <div class="mb-2 text-sm font-semibold text-gray-700">
+                    Guest reviews
+                </div>
+                <div v-for="review in hotel.rates.slice(0, 2)"
+                     :key="review._id"
+                     class="mb-2 last:mb-0 text-sm">
+                    <div class="flex items-center justify-between gap-2">
+                        <span class="font-medium">{{ review.username }}</span>
+                        <span class="whitespace-nowrap text-orange-400">
+                            {{ "★".repeat(review.stars) }}
+                        </span>
+                    </div>
+                    <p class="mt-1 text-gray-600">{{ review.text }}</p>
+                </div>
+            </div>
         </div>
     </a>
 </template>
