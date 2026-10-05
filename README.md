@@ -1,29 +1,49 @@
-# hotelRating
+# 🏨 Hotel Rating Web Application
 
-Vue 3 in Vite.
+Современное веб-приложение для просмотра, оценки и бронирования отелей с интерактивным интерфейсом, системой рейтингов и личным кабинетом.
 
-## Recommended IDE Setup
+[![Vue.js](https://img.shields.io/badge/Vue.js-3.x-4FC08D?style=flat-square&logo=vuedotjs&logoColor=white)](https://vuejs.org/)
+[![Vite](https://img.shields.io/badge/Vite-4.x-646CFF?style=flat-square&logo=vite&logoColor=white)](https://vitejs.org/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.x-38B2AC?style=flat-square&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+[![License](https://img.shields.io/badge/License-MIT-blue.style=flat-square)](LICENSE)
 
-[VSCode](https://code.visualstudio.com/)
+---
 
-## Customize configuration
+## 🌟 Основные возможности
 
-See [Vite Configuration Reference](https://vitejs.dev/config/).
+- **🏨 Каталог отелей:** Просмотр списка доступных отелей с динамической загрузкой данных через REST API.
+- **⭐ Система рейтингов и отзывов:** Пользователи могут выставлять оценки и оставлять отзывы о сервисе и номерах.
+- **👤 Авторизация и аутентификация:** Безопасный вход и регистрация пользователей с использованием JWT-токенов.
+- **📱 Адаптивный UI/UX:** Полностью отзывчивый интерфейс, оптимизированный под мобильные устройства, планшеты и ПК.
+- **⚡ Высокая скорость работы:** Мгновенная сборка и оптимизированный рендеринг благодаря Vite и Vue 3 Composition API.
 
-## Project Setup
+---
 
-```sh
-npm install
-```
+## 🛠 Технологический стек
 
-### Compile and Hot-Reload for Development
+### Frontend
+- **Framework:** Vue 3 (Options / Composition API)
+- **State Management:** Vuex 4 (модульная архитектура)
+- **Routing:** Vue Router (HTML5 History Mode)
+- **Styling:** Tailwind CSS + PostCSS
+- **HTTP Client:** Axios (с кастомными инстансами и перехватчиками)
+- **Build Tool:** Vite
 
-```sh
-npm run dev
-```
+### Инфраструктура и деплой
+- **Hosting:** Vercel
+- **CI/CD:** Автоматический деплой при пуше в ветку `main`
 
-### Compile and Minify for Production
+---
 
-```sh
-npm run build
-```
+## 📂 Структура проекта
+
+```text
+src/
+├── api/          # Модули API-запросов (Auth, Rates)
+├── assets/       # Статические ресурсы (картинки, глобальные стили)
+├── components/   # Переиспользуемые Vue-компоненты (UI kit, модалки)
+├── router/       # Конфигурация маршрутизации (Vue Router)
+├── store/        # Глобальное состояние приложения (Vuex)
+├── views/        # Страницы приложения
+├── App.vue       # Корневой компонент
+└── main.js       # Точка входа в приложение
