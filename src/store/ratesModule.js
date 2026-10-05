@@ -1,4 +1,4 @@
-import { RatesAPI } from "@/api/RatesAPI";
+import { RatesAPI } from "@/api/ratesAPI";
 import mockHotels from "@/data/mockHotels";
 import { getDemoReviews, saveDemoReviews } from "@/data/demoReviews";
 
