@@ -15,9 +15,14 @@
                         </div>
                     </button>
                     <button class="w-fit text-red-500"
+                            v-if="!$store.state.authModule.demoAccount"
                             @click="deleteAccount">
                         Delete account
                     </button>
+                    <p v-if="$store.state.authModule.demoAccount"
+                       class="text-sm text-gray-500">
+                        Demo account — active for this browser tab only.
+                    </p>
                 </div>
             </div>
         </div>
@@ -26,8 +31,8 @@
 <script>
 export default {
     methods: {
-        signOut() {
-            localStorage.clear()
+        async signOut() {
+            await this.$store.dispatch("authModule/signOut");
             location.reload();
         },
         deleteAccount() {

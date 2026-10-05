@@ -65,6 +65,16 @@
                               @click.prevent="signUp()">Sign Up</v-button>
                     <v-button v-else
                               @click.prevent="signIn()">Sign In</v-button>
+                    <template v-if="account">
+                        <div class="text-center text-sm text-gray-500">or</div>
+                        <v-button type="button"
+                                  @click="signInDemo">
+                            Continue as demo guest
+                        </v-button>
+                        <p class="text-center text-xs text-gray-500">
+                            Demo access lasts until this browser tab is closed.
+                        </p>
+                    </template>
                     <v-link @click="haveAccount">{{
                         account
                         ? "I don't have an account"
@@ -109,6 +119,10 @@ export default {
 
         async signIn() {
             await this.$store.dispatch('authModule/signIn')
+        },
+        async signInDemo() {
+            await this.$store.dispatch("authModule/demoSignIn");
+            this.$router.push("/");
         },
         async signUp() {
             await this.$store.dispatch('authModule/signUp')

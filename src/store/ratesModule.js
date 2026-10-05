@@ -2,6 +2,9 @@ import { RatesAPI } from "@/api/ratesAPI";
 import mockHotels from "@/data/mockHotels";
 import { getDemoReviews, saveDemoReviews } from "@/data/demoReviews";
 
+const currentUsername = () =>
+    sessionStorage.getItem("demoName") || localStorage.getItem("name") || "Гость";
+
 export const ratesModule = {
     namespaced: true,
     state: () => ({
@@ -70,7 +73,7 @@ export const ratesModule = {
     actions: {
         async getRates({ commit, state }) {
             const hotel = mockHotels.find((item) => item._id === state.getData.id);
-            const username = localStorage.getItem("name") || "Гость";
+            const username = currentUsername();
 
             if (hotel) {
                 const allReviews = getDemoReviews(hotel);
@@ -115,7 +118,7 @@ export const ratesModule = {
             }
 
             const hotel = mockHotels.find((item) => item._id === state.getData.id);
-            const username = localStorage.getItem("name") || "Гость";
+            const username = currentUsername();
             if (hotel) {
                 const reviews = getDemoReviews(hotel);
                 if (reviews.some((rate) => rate.username === username && rate.isDemoUserReview)) {
@@ -161,7 +164,7 @@ export const ratesModule = {
         async deleteReview({ commit, state }) {
             const hotel = mockHotels.find((item) => item._id === state.getData.id);
             if (hotel) {
-                const username = localStorage.getItem("name") || "Гость";
+                const username = currentUsername();
                 const reviews = getDemoReviews(hotel).filter(
                     (rate) => !(rate.username === username && rate.isDemoUserReview)
                 );

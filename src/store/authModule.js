@@ -2,10 +2,13 @@ import { AuthAPI } from "@/api/authAPI";
 export const authModule = {
     namespaced: true,
     state: () => ({
-        token: localStorage.getItem("token") || null,
-        authorized: localStorage.hasOwnProperty("token") || false,
+        token: localStorage.getItem("token") || sessionStorage.getItem("demoToken") || null,
+        authorized:
+            localStorage.hasOwnProperty("token") ||
+            sessionStorage.getItem("demoAccount") === "true",
+        demoAccount: sessionStorage.getItem("demoAccount") === "true",
 
-        name: localStorage.getItem("name") || "",
+        name: sessionStorage.getItem("demoName") || localStorage.getItem("name") || "",
 
         username: "",
         password: "",
@@ -25,8 +28,41 @@ export const authModule = {
         setPassword(state, value) {
             state.password = value;
         },
+        setDemoAccount(state) {
+            state.token = "demo-session";
+            state.authorized = true;
+            state.demoAccount = true;
+            state.name = "Demo Guest";
+            sessionStorage.setItem("demoToken", state.token);
+            sessionStorage.setItem("demoAccount", "true");
+            sessionStorage.setItem("demoName", state.name);
+        },
+        clearSession(state) {
+            state.token = null;
+            state.authorized = false;
+            state.demoAccount = false;
+            state.name = "";
+            sessionStorage.removeItem("demoToken");
+            sessionStorage.removeItem("demoAccount");
+            sessionStorage.removeItem("demoName");
+            localStorage.removeItem("token");
+            localStorage.removeItem("name");
+        },
     },
     actions: {
+        demoSignIn({ commit }) {
+            commit("setDemoAccount");
+        },
+        signOut({ commit, state }) {
+            if (state.demoAccount) {
+                commit("clearSession");
+                return;
+            }
+
+            localStorage.clear();
+            sessionStorage.clear();
+            commit("clearSession");
+        },
         async signUp({ state }) {
             try {
                 const res = await AuthAPI.signUp({
